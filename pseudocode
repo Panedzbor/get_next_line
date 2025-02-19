@@ -1,0 +1,9 @@
+Read the buffer with given size and save the result under a string.
+Search for \n or EOF.
+If found, save it and everything before with malloc under another string.
+If not, save it and continue reading until found, and each time string join the new part and free the old string.
+If there are left overs after the first new line, save them witm malloc under a static variable.
+Return the pointer to the new line.
+Next time read left overs until \n or EOF is met.
+If smth is left after first \n, save them under another temporary string, free the previous static string and reassign the contet of temp to it.
+If \n or EOF isn't met, continue reading. When you meet \n or EOF create a new string and connect both left overs and part of new read and return.
