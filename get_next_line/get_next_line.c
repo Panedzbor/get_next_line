@@ -2,7 +2,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-#define BUFFER_SIZE 1000
+
 
 char *concat_left(ssize_t len, char *str, t_st *st);
 char    *erase_left(t_st *st);
@@ -30,7 +30,6 @@ int main()
 char    *get_next_line(int fd)
 {
     ssize_t     len;
-    char        buffer[BUFFER_SIZE + 1];
     static t_st st;
     bool        buf;
 
@@ -39,18 +38,18 @@ char    *get_next_line(int fd)
     buf = false;
     if (!st.left || st.check != 0)
     {
-        len = read(fd, buffer, BUFFER_SIZE);
+        len = read(fd, st.buffer, BUFFER_SIZE);
         if (len <= 0 && !st.left)
             return (NULL);
         if (len < BUFFER_SIZE)
-            return (compose_newl(buffer, len - 1, &st));
-        buffer[len] = '\0';
+            return (compose_newl(st.buffer, len - 1, &st));
+        st.buffer[len] = '\0';
         buf = true;
     }
     else
         len = count_size(st.left);
     if (buf)
-        return (search_newl(buffer, len, &st, &buf));
+        return (search_newl(st.buffer, len, &st, &buf));
     return (search_newl(st.left, len, &st, &buf));
 }
 
