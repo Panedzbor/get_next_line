@@ -105,8 +105,8 @@ char *compose_newl(char *str, ssize_t last_char, t_st *st)
     
     leftlen = 0;
     if (st->left && st->check == -1)
-        leftlen = count_size(st->left);
-    next_line = (char *)malloc(leftlen + last_char + 2);
+        leftlen = count_size(st->left);printf("s: %d\n", leftlen + last_char + 2);
+    write(1,"?",1);next_line = (char *)malloc(leftlen + last_char + 2);write(1,"!",1);
     if (!next_line)
         return (NULL);
     i = 0;
@@ -159,7 +159,7 @@ char *concat_left(ssize_t len, char *str, t_st *st)
     ssize_t     i;
     ssize_t     j;
 
-    len += count_size(st->left);
+    len += count_size(st->left) + 1;
     new_left = (char *)malloc(len);
     if (!new_left)
         return (NULL);
@@ -170,7 +170,7 @@ char *concat_left(ssize_t len, char *str, t_st *st)
         i++;
     }
     j = 0;
-    while (j <= len)
+    while (j < len)
         new_left[i++] = str[j++];
     erase_left(st);printf("n: %s\n", new_left);
     return (new_left);
