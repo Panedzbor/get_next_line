@@ -2,7 +2,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-#define BUFFER_SIZE 42
+#define BUFFER_SIZE 1000
 
 char *concat_left(ssize_t len, char *str, t_st *st);
 char    *erase_left(t_st *st);
@@ -15,7 +15,7 @@ char    *get_next_line(int fd);
 
 int main()
 {
-    int fd = open("../test_lines.txt", O_RDONLY);
+    int fd = open("../test_lines.txt", 0);
     if (fd == -1)
         exit(-1);
     for (char *l = get_next_line(fd); l; l = get_next_line(fd))
@@ -40,10 +40,10 @@ char    *get_next_line(int fd)
     if (!st.left || st.check != 0)
     {
         len = read(fd, buffer, BUFFER_SIZE);
-        if (len == -1)
+        if (len <= 0 && !st.left)
             return (NULL);
-        if (len == 0)
-            return (st.left);
+        if (len < BUFFER_SIZE)
+            return (compose_newl(buffer, len - 1, &st));
         buffer[len] = '\0';
         buf = true;
     }
@@ -65,6 +65,8 @@ ssize_t count_size(char *str)
 {
     ssize_t i;
 
+    if (!str)
+        return (0);
     i = 0;
     while (str[i] != '\0')
         i++;
@@ -105,8 +107,8 @@ char *compose_newl(char *str, ssize_t last_char, t_st *st)
     
     leftlen = 0;
     if (st->left && st->check == -1)
-        leftlen = count_size(st->left);printf("s: %d\n", leftlen + last_char + 2);
-    write(1,"?",1);next_line = (char *)malloc(leftlen + last_char + 2);write(1,"!",1);
+        leftlen = count_size(st->left);
+    next_line = (char *)malloc(leftlen + last_char + 2);
     if (!next_line)
         return (NULL);
     i = 0;
@@ -164,14 +166,18 @@ char *concat_left(ssize_t len, char *str, t_st *st)
     if (!new_left)
         return (NULL);
     i = 0;
-    while (st->left[i] != '\0')
+    if (st->left)
     {
-        new_left[i] = st->left[i];
-        i++;
+        while (st->left[i] != '\0')
+        {
+            new_left[i] = st->left[i];
+            i++;
+        }
     }
     j = 0;
-    while (j < len)
+    while (i < len)
         new_left[i++] = str[j++];
-    erase_left(st);printf("n: %s\n", new_left);
+    erase_left(st);
+    st->check = -1;
     return (new_left);
 }
