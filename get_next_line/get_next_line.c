@@ -1,31 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: earutiun <earutiun@student.42berlin.d      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/02/18 14:22:47 by earutiun          #+#    #+#             */
+/*   Updated: 2025/02/18 14:23:51 by earutiun         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
-#include <fcntl.h>
-#include <stdio.h>
 
-
-
-char *concat_left(ssize_t len, char *str, t_st *st);
-char    *erase_left(t_st *st);
-char *overwrite_left(ssize_t len, char *str, ssize_t i, t_st *st);
-char *compose_newl(char *str, ssize_t last_char, t_st *st);
-char *search_newl(char *str, ssize_t len, t_st *st, bool *buf);
-ssize_t count_size(char *str);
-void    init_struct(t_st *st, int fd);
-char    *get_next_line(int fd);
-
-int main()
-{
-    int fd = open("../test_lines.txt", 0);
-    if (fd == -1)
-        exit(-1);
-    for (char *l = get_next_line(fd); l; l = get_next_line(fd))
-    {
-        printf("%s", l);
-        fflush(stdout);
-        free((void*)l);
-    }
-    return 0;
-}
+static char *search_newl(char *str, ssize_t len, t_st *st, bool *buf);
+static char *compose_newl(char *str, ssize_t last_char, t_st *st);
+static char *overwrite_left(ssize_t len, char *str, ssize_t i, t_st *st);
+static char *concat_left(ssize_t len, char *str, t_st *st);
 
 char    *get_next_line(int fd)
 {
@@ -53,29 +43,10 @@ char    *get_next_line(int fd)
     return (search_newl(st.left, len, &st, &buf));
 }
 
-void    init_struct(t_st *st, int fd)
+char    *search_newl(char *str, ssize_t len, t_st *st, bool *buf)
 {
-    st->left = NULL;
-    st->check = 0;
-    st->fd = fd;
-}
-
-ssize_t count_size(char *str)
-{
-    ssize_t i;
-
-    if (!str)
-        return (0);
-    i = 0;
-    while (str[i] != '\0')
-        i++;
-    return (i);
-}
-
-char *search_newl(char *str, ssize_t len, t_st *st, bool *buf)
-{
-    ssize_t  i;
-    char    *next_line;
+    ssize_t     i;
+    char        *next_line;
 
     i = 0;
     while (i < len)
@@ -98,7 +69,7 @@ char *search_newl(char *str, ssize_t len, t_st *st, bool *buf)
     return (next_line);
 }
 
-char *compose_newl(char *str, ssize_t last_char, t_st *st)
+char    *compose_newl(char *str, ssize_t last_char, t_st *st)
 {
     char    *next_line;
     ssize_t i;
@@ -127,7 +98,7 @@ char *compose_newl(char *str, ssize_t last_char, t_st *st)
     return (next_line);
 }
 
-char *overwrite_left(ssize_t len, char *str, ssize_t i, t_st *st)
+char    *overwrite_left(ssize_t len, char *str, ssize_t i, t_st *st)
 {
     char    *new_left;
     ssize_t y;
@@ -145,20 +116,11 @@ char *overwrite_left(ssize_t len, char *str, ssize_t i, t_st *st)
     return (new_left);
 }
 
-
-char    *erase_left(t_st *st)
-{
-    if (st->left)
-        free((void *)st->left);
-    st->check = 0;
-    return (NULL);   
-}
-
-char *concat_left(ssize_t len, char *str, t_st *st)
+char    *concat_left(ssize_t len, char *str, t_st *st)
 {
     char    *new_left;
-    ssize_t     i;
-    ssize_t     j;
+    ssize_t i;
+    ssize_t j;
 
     len += count_size(st->left) + 1;
     new_left = (char *)malloc(len);
