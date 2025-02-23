@@ -65,7 +65,7 @@ static t_st *add_el(t_st **start)
     last_el->next = new_el;
     return (new_el);
 }
-//header
+
 char    *del_el(t_st **start, t_st *to_remove, char *next_line)
 {
     t_st    *current;
