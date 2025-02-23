@@ -17,6 +17,7 @@ void    init_struct(t_st *st, int fd)
     st->left = NULL;
     st->check = 0;
     st->fd = fd;
+    st->blen = 0;
 }
 
 ssize_t count_size(char *str)

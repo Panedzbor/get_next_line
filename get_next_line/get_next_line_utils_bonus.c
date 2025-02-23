@@ -12,17 +12,17 @@
 
 #include "get_next_line_bonus.h"
 
-static int  first_el(t_st *st);
-static int  search_fd(int fd, t_st *st);
-static int  add_el(int fd, t_st *st);
-static int  copy_el(t_st *new, t_st *st, int fd);
-static void copy_buf(t_st *new, t_st *st, int i);
+static int  first_el(t_st **st);
+static int  search_fd(int fd, t_st **st);
+static int  add_el(int fd, t_st **st);
+static int  copy_el(t_st **new_st, t_st **st, int fd);
+static void copy_buf(t_st **new_st, t_st **st, int i);
 
-int check_fd(int fd, t_st *st)
+int check_fd(int fd, t_st **st)
 {
     int index;
 
-    if (!st)
+    if (!*st)
         return(first_el(st));
     index = search_fd(fd, st);
     if (index >= 0)
@@ -31,81 +31,85 @@ int check_fd(int fd, t_st *st)
     return (index);
 }
 
-static int  first_el(t_st *st)
+static int  first_el(t_st **st)
 {
-    st = (t_st *)malloc(sizeof(t_st));
-    if (!st)
-        return (NULL);
-    st->next = NULL;
+    *st = (t_st *)malloc(sizeof(t_st));
+    if (!*st)
+        return (-1);
+    (*st)[0].left = NULL;
+    (*st)[0].next = NULL;
     return (0);
 }
 
-static int  search_fd(int fd, t_st *st)
+static int  search_fd(int fd, t_st **st)
 {
     int i;
 
     i = 0;
     while (true)
     {
-        if (st[i].fd == fd)
+        if ((*st)[i].fd == fd)
             return (i);
-        if (!st[i].next)
+        if (!(*st)[i].next)
             break ;
         i++;
     }
     return (-1);
 }
 
-static int  add_el(int fd, t_st *st)
+static int  add_el(int fd, t_st **st)
 {
     int i;
-    t_st *new;
+    t_st *new_st;
 
     i = 0;
     while (true)
     {
-        if (!st[i++].next)
+        if (!(*st)[i++].next)
             break ;
     }
-    new = (t_st *)malloc((i + 2) * sizeof(t_st));
-    if (!new)
-        return (NULL);
-    i = copy_el(new, st, fd);
-    free ((void*)st);
-    st = new;
+    new_st = (t_st *)malloc((i + 1) * sizeof(t_st));
+    if (!new_st)
+        return (-1);
+    i = copy_el(&new_st, st, fd);
+    free ((void*)*st);
+    *st = new_st;
     return (i);
 }
 
-static int  copy_el(t_st *new, t_st *st, int fd)
+static int  copy_el(t_st **new_st, t_st **st, int fd)
 {
     int i;
 
     i = 0;
     while (true)
     {
-        new[i].left = st[i].left;
-        new[i].check = st[i].check;
-        copy_buf(new, st, i);
-        new[i].fd = st[i].fd;
-        new[i].next = st[i].next;
-        if (!st[i].next)
+        (*new_st)[i].left = (*st)[i].left;
+        (*new_st)[i].check = (*st)[i].check;
+        (*new_st)[i].fd = (*st)[i].fd;
+        (*new_st)[i].blen = (*st)[i].blen;
+        copy_buf(new_st, st, i);
+        (*new_st)[i].next = &(*new_st)[i + 1];
+        if (!(*st)[i].next)
             break ;
         i++;
     }
-    new[i].next = &new[i + 1];
-    new[++i].next = NULL;
+    i++;
+    (*new_st)[i].next = NULL;
+    (*new_st)[i].fd = fd;
+    (*new_st)[i].left = NULL;
     return (i);
 }
 
-static void copy_buf(t_st *new, t_st *st, int i)
+static void copy_buf(t_st **new_st, t_st **st, int i)
 {
     int j;
     
     j = 0;
     while (true)
     {
-        new[i].buffer[j] = st[i].buffer[j];
-        if (st[i].buffer[j] == '\0')
+        (*new_st)[i].buffer[j] = (*st)[i].buffer[j];
+        if ((*st)[i].buffer[j] == '\0')
             break ;
         j++;
     }
@@ -116,6 +120,7 @@ void    init_struct(t_st *st, int fd)
     st->left = NULL;
     st->check = 0;
     st->fd = fd;
+    st->blen = 0;
 }
 
 ssize_t count_size(char *str)

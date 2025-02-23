@@ -29,10 +29,11 @@ char    *get_next_line(int fd)
     if (!st.left || st.check != 0)
     {
         len = read(fd, st.buffer, BUFFER_SIZE);
+        st.blen = len;
         if (len <= 0 && !st.left)
             return (NULL);
-        if (len < BUFFER_SIZE)
-            return (compose_newl(st.buffer, len - 1, &st));
+        /* if (len < BUFFER_SIZE)
+            return (compose_newl(st.buffer, len - 1, &st)); */
         st.buffer[len] = '\0';
         buf = true;
     }
@@ -51,7 +52,7 @@ char    *search_newl(char *str, ssize_t len, t_st *st, bool *buf)
     i = 0;
     while (i < len)
     {
-        if (str[i] == '\n')
+        if (str[i] == '\n' || (st->blen < BUFFER_SIZE && str[i + 1] == '\0'))
         {
             if (!*buf)
                 st->check = 1;
@@ -61,6 +62,8 @@ char    *search_newl(char *str, ssize_t len, t_st *st, bool *buf)
         }
         i++;
     }
+    if (st->blen == 0)
+        return (compose_newl(str, -1, st));
     if (!*buf)
         st->check = -1;
     else

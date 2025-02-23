@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
+#include <stdio.h>//test
 
 static char *search_newl(char *str, ssize_t len, t_st *st, bool *buf);
 static char *compose_newl(char *str, ssize_t last_char, t_st *st);
@@ -24,17 +25,16 @@ char    *get_next_line(int fd)
     int         index;
     bool        buf;
 
-    index = check_fd(fd, st);
+    index = check_fd(fd, &st);
     if (!st[index].left)
         init_struct(&st[index], fd);
     buf = false;
     if (!st[index].left || st[index].check != 0)
     {
         len = read(fd, st[index].buffer, BUFFER_SIZE);
+        st[index].blen = len;
         if (len <= 0 && !st[index].left)
             return (NULL);
-        if (len < BUFFER_SIZE)
-            return (compose_newl(st[index].buffer, len - 1, &st[index]));
         st[index].buffer[len] = '\0';
         buf = true;
     }
@@ -53,7 +53,7 @@ char    *search_newl(char *str, ssize_t len, t_st *st, bool *buf)
     i = 0;
     while (i < len)
     {
-        if (str[i] == '\n')
+        if (str[i] == '\n' || (st->blen < BUFFER_SIZE && str[i + 1] == '\0'))
         {
             if (!*buf)
                 st->check = 1;
@@ -63,6 +63,8 @@ char    *search_newl(char *str, ssize_t len, t_st *st, bool *buf)
         }
         i++;
     }
+    if (st->blen == 0)
+        return (compose_newl(str, -1, st));
     if (!*buf)
         st->check = -1;
     else

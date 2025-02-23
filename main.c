@@ -1,4 +1,4 @@
-#include "get_next_line/get_next_line_bonus.h"
+#include "get_next_line/get_next_line.h"
 #include <fcntl.h>
 #include <stdio.h>
 
@@ -7,8 +7,10 @@ int main()
     int fd = open("test_lines.txt", 0);
     if (fd == -1)
         exit(-1);
-    for (char *l = get_next_line(fd); l; l = get_next_line(fd))
+    char *l = get_next_line(fd);
+        for (; l; l = get_next_line(fd))
     {
+        write(1,"!",1);
         printf("%s", l);
         fflush(stdout);
         free((void*)l);

@@ -23,17 +23,18 @@
 
 typedef struct s_statvals
 {
-    char        *left;
-    int         check;
-    char        buffer[BUFFER_SIZE + 1];
-    int         fd;
-    struct t_st *next;
+    char                *left;
+    int                 check;
+    char                buffer[BUFFER_SIZE + 1];
+    int                 fd;
+    ssize_t             blen;
+    struct s_statvals   *next;
 } t_st;
 
 char    *get_next_line(int fd);
 void    init_struct(t_st *st, int fd);
 ssize_t count_size(char *str);
 char    *erase_left(t_st *st);
-int     check_fd(int fd, t_st *st);
+int     check_fd(int fd, t_st **st);
 
 #endif

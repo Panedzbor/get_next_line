@@ -26,6 +26,7 @@ typedef struct s_statvals
     char    *left;
     int     check;
     char    buffer[BUFFER_SIZE + 1];
+    ssize_t blen;
     int     fd;
 } t_st;
 
