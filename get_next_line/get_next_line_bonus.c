@@ -11,9 +11,8 @@
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
-#include <stdio.h>//test
 
-static char *search_newl(char *str, ssize_t len, t_st *st, bool *buf);
+static char *search_newl(t_st *cur, ssize_t len, t_st **st, bool *buf);
 static char *compose_newl(char *str, ssize_t last_char, t_st *st);
 static char *overwrite_left(ssize_t len, char *str, ssize_t i, t_st *st);
 static char *concat_left(ssize_t len, char *str, t_st *st);
@@ -22,55 +21,58 @@ char    *get_next_line(int fd)
 {
     ssize_t     len;
     static t_st *st;
-    int         index;
+    t_st        *cur;
     bool        buf;
 
-    index = check_fd(fd, &st);
-    if (!st[index].left)
-        init_struct(&st[index], fd);
+    cur = check_fd(fd, &st);
+    if (!cur->left)
+        init_struct(cur, fd);
     buf = false;
-    if (!st[index].left || st[index].check != 0)
+    if (!cur->left || cur->check != 0)
     {
-        len = read(fd, st[index].buffer, BUFFER_SIZE);
-        st[index].blen = len;
-        if (len <= 0 && !st[index].left)
-            return (NULL);
-        st[index].buffer[len] = '\0';
+        len = read(fd, cur->buffer, BUFFER_SIZE);
+        cur->blen = len;
+        if (len <= 0 && !cur->left)
+            return (del_el(&st, cur, NULL));
+        cur->buffer[len] = '\0';
         buf = true;
+        cur->str = cur->buffer;
     }
     else
-        len = count_size(st[index].left);
-    if (buf)
-        return (search_newl(st[index].buffer, len, &st[index], &buf));
-    return (search_newl(st[index].left, len, &st[index], &buf));
+    {
+        len = count_size(cur->left);
+        cur->str = cur->left;
+    }
+    return (search_newl(cur, len, &st, &buf));
 }
 
-char    *search_newl(char *str, ssize_t len, t_st *st, bool *buf)
+char    *search_newl(t_st *cur, ssize_t len, t_st **st, bool *buf)
 {
     ssize_t     i;
-    char        *next_line;
 
     i = 0;
     while (i < len)
     {
-        if (str[i] == '\n' || (st->blen < BUFFER_SIZE && str[i + 1] == '\0'))
+        if (cur->str[i] == '\n' 
+            || (cur->blen < BUFFER_SIZE && cur->str[i + 1] == '\0'))
         {
             if (!*buf)
-                st->check = 1;
-            next_line = compose_newl(str, i, st);
-            st->left = overwrite_left(len, str, i, st);
-            return (next_line);
+                cur->check = 1;
+            char *nl = compose_newl(cur->str, i, cur);
+            cur->left = overwrite_left(len, cur->str, i, cur);
+            if (cur->blen < BUFFER_SIZE && cur->str[i + 1] == '\0')
+                del_el(st, cur, NULL);
+            return (nl);
         }
         i++;
     }
-    if (st->blen == 0)
-        return (compose_newl(str, -1, st));
+    if (cur->blen == 0)
+        return (del_el(st, cur, compose_newl(cur->str, -1, cur)));
     if (!*buf)
-        st->check = -1;
+        cur->check = -1;
     else
-        st->left = concat_left(len, str, st);
-    next_line = get_next_line(st->fd);
-    return (next_line);
+        cur->left = concat_left(len, cur->str, cur);
+    return (get_next_line(cur->fd));
 }
 
 char    *compose_newl(char *str, ssize_t last_char, t_st *st)

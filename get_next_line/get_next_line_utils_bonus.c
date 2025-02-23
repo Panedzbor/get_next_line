@@ -12,108 +12,77 @@
 
 #include "get_next_line_bonus.h"
 
-static int  first_el(t_st **st);
-static int  search_fd(int fd, t_st **st);
-static int  add_el(int fd, t_st **st);
-static int  copy_el(t_st **new_st, t_st **st, int fd);
-static void copy_buf(t_st **new_st, t_st **st, int i);
+static t_st *create_el(t_st **st);
+static t_st *search_fd(int fd, t_st **st);
+static t_st *add_el(t_st **st);
 
-int check_fd(int fd, t_st **st)
+t_st    *check_fd(int fd, t_st **start)
 {
-    int index;
+    t_st    *current;
 
-    if (!*st)
-        return(first_el(st));
-    index = search_fd(fd, st);
-    if (index >= 0)
-        return (index);
-    index = add_el(fd, st);
-    return (index);
+    if (!*start)
+        return(create_el(start));
+    current = search_fd(fd, start);
+    if (current)
+        return (current);
+    current = add_el(start);
+    return (current);
 }
 
-static int  first_el(t_st **st)
+static t_st *  create_el(t_st **ptr)
 {
-    *st = (t_st *)malloc(sizeof(t_st));
-    if (!*st)
-        return (-1);
-    (*st)[0].left = NULL;
-    (*st)[0].next = NULL;
-    return (0);
+    *ptr = (t_st *)malloc(sizeof(t_st));
+    if (!*ptr)
+        return (NULL);
+    (*ptr)[0].left = NULL;
+    (*ptr)[0].next = NULL;
+    return (*ptr);
 }
 
-static int  search_fd(int fd, t_st **st)
+static t_st *search_fd(int fd, t_st **start)
 {
-    int i;
-
-    i = 0;
-    while (true)
-    {
-        if ((*st)[i].fd == fd)
-            return (i);
-        if (!(*st)[i].next)
-            break ;
-        i++;
-    }
-    return (-1);
-}
-
-static int  add_el(int fd, t_st **st)
-{
-    int i;
-    t_st *new_st;
-
-    i = 0;
-    while (true)
-    {
-        if (!(*st)[i++].next)
-            break ;
-    }
-    new_st = (t_st *)malloc((i + 1) * sizeof(t_st));
-    if (!new_st)
-        return (-1);
-    i = copy_el(&new_st, st, fd);
-    free ((void*)*st);
-    *st = new_st;
-    return (i);
-}
-
-static int  copy_el(t_st **new_st, t_st **st, int fd)
-{
-    int i;
-
-    i = 0;
-    while (true)
-    {
-        (*new_st)[i].left = (*st)[i].left;
-        (*new_st)[i].check = (*st)[i].check;
-        (*new_st)[i].fd = (*st)[i].fd;
-        (*new_st)[i].blen = (*st)[i].blen;
-        copy_buf(new_st, st, i);
-        (*new_st)[i].next = &(*new_st)[i + 1];
-        if (!(*st)[i].next)
-            break ;
-        i++;
-    }
-    i++;
-    (*new_st)[i].next = NULL;
-    (*new_st)[i].fd = fd;
-    (*new_st)[i].left = NULL;
-    return (i);
-}
-
-static void copy_buf(t_st **new_st, t_st **st, int i)
-{
-    int j;
+    t_st    *current;
     
-    j = 0;
-    while (true)
+    current = *start;
+    while (current)
     {
-        (*new_st)[i].buffer[j] = (*st)[i].buffer[j];
-        if ((*st)[i].buffer[j] == '\0')
-            break ;
-        j++;
+        if (current->fd == fd)
+            return (current);
+        current = current->next;
     }
+    return (NULL);
 }
+
+static t_st *add_el(t_st **start)
+{
+    t_st    *new_el;
+    t_st    *last_el;
+
+    create_el(&new_el);
+    last_el = *start;
+    while (last_el->next)
+        last_el = last_el->next;
+    last_el->next = new_el;
+    return (new_el);
+}
+//header
+char    *del_el(t_st **start, t_st *to_remove, char *next_line)
+{
+    t_st    *current;
+
+    if (*start != to_remove)
+    {
+        current = *start;
+        while (current->next != to_remove)
+            current = current->next;
+        current->next = current->next->next;
+    }
+    else
+        *start = (*start)->next;
+    free((void *)to_remove);
+    return (next_line);
+}
+
 
 void    init_struct(t_st *st, int fd)
 {
@@ -121,6 +90,7 @@ void    init_struct(t_st *st, int fd)
     st->check = 0;
     st->fd = fd;
     st->blen = 0;
+    st->str = NULL;
 }
 
 ssize_t count_size(char *str)

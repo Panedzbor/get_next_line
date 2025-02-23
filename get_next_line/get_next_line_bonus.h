@@ -29,12 +29,14 @@ typedef struct s_statvals
     int                 fd;
     ssize_t             blen;
     struct s_statvals   *next;
+    char                *str;
 } t_st;
 
 char    *get_next_line(int fd);
 void    init_struct(t_st *st, int fd);
 ssize_t count_size(char *str);
 char    *erase_left(t_st *st);
-int     check_fd(int fd, t_st **st);
+t_st    *check_fd(int fd, t_st **st);
+char    *del_el(t_st **start, t_st *to_remove, char *next_line);
 
 #endif

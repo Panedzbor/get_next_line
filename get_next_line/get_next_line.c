@@ -32,8 +32,6 @@ char    *get_next_line(int fd)
         st.blen = len;
         if (len <= 0 && !st.left)
             return (NULL);
-        /* if (len < BUFFER_SIZE)
-            return (compose_newl(st.buffer, len - 1, &st)); */
         st.buffer[len] = '\0';
         buf = true;
     }
