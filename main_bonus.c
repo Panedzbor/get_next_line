@@ -11,13 +11,14 @@ int main()
     if (fd1 == -1 || fd2 == -1 || fd3 == -1)
         exit(-1);
     char *l = NULL;
-    for (int i = 0, index = 0, c = 0; c < 3; i++)
+    for (int i = 0, index = 0, c = 0; c < 9; i++)
     {
         index = i % 3;
+
         l = get_next_line(fds[index]);
         if (l)
         {
-            write(1,"!",1);
+            write(1,"[NL]",4);
             printf("%s", l);
             fflush(stdout);
             free((void*)l);
@@ -25,5 +26,6 @@ int main()
         else
             c++;
     }
+    close(fd1);close(fd2);close(fd3);
     return 0;
 }

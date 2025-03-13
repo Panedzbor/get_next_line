@@ -10,29 +10,29 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GNL_H
-# define GNL_H
+#ifndef GET_NEXT_LINE_H
+# define GET_NEXT_LINE_H
 
 # include <unistd.h>
 # include <stdlib.h>
 # include <stdbool.h>
 
-#ifndef BUFFER_SIZE
-# define BUFFER_SIZE 42
-#endif
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 42
+# endif
 
 typedef struct s_statvals
 {
-    char    *left;
-    int     check;
-    char    buffer[BUFFER_SIZE + 1];
-    ssize_t blen;
-    int     fd;
-} t_st;
+	char	*left;
+	int		check;
+	char	buffer[BUFFER_SIZE + 1];
+	ssize_t	blen;
+	int		fd;
+}	t_st;
 
-char    *get_next_line(int fd);
-void    init_struct(t_st *st, int fd);
-ssize_t count_size(char *str);
-char    *erase_left(t_st *st);
+char	*get_next_line(int fd);
+void	init_struct(t_st *st, int fd);
+ssize_t	count_size(char *str);
+char	*erase_left(t_st *st);
 
 #endif
